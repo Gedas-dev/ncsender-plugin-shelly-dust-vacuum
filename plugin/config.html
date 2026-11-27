@@ -1,0 +1,451 @@
+<style>
+  /* ncSender styles every button in a plugin window (accent fill, its own
+     padding); the #sde-root rules below are written to win over that. */
+  /* ncSender's own dialog header is hidden: this window has its name and Close. */
+  .plugin-dialog-header { display: none !important; }
+  .plugin-dialog-content { padding: 0 !important; }
+
+  .sde { --sde-accent: var(--color-accent, #1a9c8f); --sde-border: var(--color-border, #d3d9e1); --sde-muted: var(--color-surface-muted, #f1f4f8);
+    --sde-text: var(--color-text-primary, #17202b); --sde-text2: var(--color-text-secondary, #5b6776); --sde-ok: var(--sde-accent); --sde-bad: #d6453d; --sde-info: #3b82f6;
+    width: 640px; max-width: 95vw; max-height: 85vh; display: flex; flex-direction: column; overflow: hidden;
+    background: var(--color-surface, #fff); color: var(--sde-text); border-radius: var(--radius-medium, 12px);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 15px; line-height: 1.45; text-align: left; }
+  .sde *, .sde *::before, .sde *::after { box-sizing: border-box; }
+  .sde [hidden] { display: none !important; }
+  .sde-head { flex: none; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid var(--sde-border); }
+  .sde-eyebrow { display: block; font-size: 10px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--sde-accent); }
+  .sde-title { display: block; font-size: 1.15rem; font-weight: 700; }
+  /* One tab per device; its dot is lit while that device runs. */
+  .sde-tabs { flex: none; display: flex; gap: 8px; padding: 12px 20px 0; }
+  #sde-root .sde-tab { flex: 1; display: flex; align-items: center; gap: 10px; text-align: left; font: inherit; line-height: 1.25; padding: 10px 14px; border-radius: 12px; cursor: pointer; background: transparent; color: var(--sde-text2); border: 1.5px solid var(--sde-border); box-shadow: none; min-width: 0; }
+  #sde-root .sde-tab[aria-selected="true"] { background: var(--sde-muted); color: var(--sde-text); border-color: var(--sde-accent); }
+  .sde-tab b { display: block; font-size: .98rem; } .sde-tab small { display: block; font-size: .8rem; color: var(--sde-text2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .sde-tab .sde-dot { width: 11px; height: 11px; }
+  .sde-body { flex: 1; min-height: 0; overflow-y: auto; padding: 14px 20px 20px; }
+  .sde-view { display: flex; flex-direction: column; gap: 14px; }
+  .sde-view h2 { margin: 0; font-size: 1.25rem; }
+  .sde-view p { margin: 0; color: var(--sde-text2); }
+  #sde-root .sde-btn { font: inherit; font-size: .92rem; font-weight: 600; line-height: 1.2; border: 0; border-radius: 10px; padding: 10px 16px; cursor: pointer; background: var(--sde-accent); color: #fff; white-space: nowrap; }
+  #sde-root .sde-btn:disabled { opacity: .5; cursor: default; }
+  #sde-root .sde-btn.sec { background: var(--sde-muted); color: var(--sde-text); border: 1.5px solid var(--sde-border); }
+  .sde-card { background: var(--sde-muted); border-radius: 14px; padding: 14px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+  .sde-now { flex-direction: row; align-items: center; justify-content: space-between; flex-wrap: wrap; }
+  .sde-state { display: flex; align-items: center; gap: 12px; min-width: 0; flex: 1 1 240px; }
+  .sde-state b { display: block; font-size: 1.25rem; line-height: 1.2; }
+  .sde-dot { width: 14px; height: 14px; border-radius: 50%; flex: none; background: var(--sde-text2); }
+  .sde-dot.on { background: var(--sde-ok); box-shadow: 0 0 0 4px color-mix(in srgb, var(--sde-ok) 22%, transparent); }
+  .sde-dot.busy { background: var(--sde-info); } .sde-dot.bad { background: var(--sde-bad); }
+  .sde-now.on { box-shadow: inset 0 0 0 1.5px var(--sde-accent); }
+  /* Off | On: the filled half is the state the extractor is in (or is being switched to). */
+  #sde-root .sde-seg { display: flex; flex: none; gap: 3px; padding: 3px; border-radius: 12px; background: var(--color-surface, #fff); border: 1.5px solid var(--sde-border); }
+  #sde-root .sde-seg button { font: inherit; font-size: .95rem; font-weight: 700; line-height: 1.2; min-width: 70px; border: 0; border-radius: 9px; padding: 10px 16px; cursor: pointer; background: transparent; color: var(--sde-text2); box-shadow: none; }
+  #sde-root .sde-seg button:disabled { opacity: .5; cursor: default; }
+  #sde-root .sde-seg #sde-off[aria-pressed="true"] { background: color-mix(in srgb, var(--sde-text2) 30%, transparent); color: var(--sde-text); }
+  #sde-root .sde-seg #sde-on[aria-pressed="true"] { background: var(--sde-accent); color: #fff; box-shadow: 0 0 0 3px color-mix(in srgb, var(--sde-accent) 28%, transparent); }
+  #sde-root .sde-seg button.pending { animation: sde-pulse 1s ease-in-out infinite; }
+  @keyframes sde-pulse { 50% { opacity: .55; } }
+  .sde-field { display: flex; flex-direction: column; gap: 6px; font-weight: 600; min-width: 0; }
+  .sde-input { font: inherit; font-weight: 400; color: var(--sde-text); background: var(--color-surface, #fff); border: 1.5px solid var(--sde-border); border-radius: 10px; padding: 10px 12px; width: 100%; min-width: 0; }
+  .sde-input:focus { outline: none; border-color: var(--sde-accent); }
+  .sde-hint { display: block; color: var(--sde-text2); font-size: .82rem; font-weight: 400; }
+  .sde-hint.good { color: var(--sde-ok); font-weight: 600; } .sde-hint.bad { color: var(--sde-bad); font-weight: 600; }
+  .sde-line { display: flex; gap: 8px; align-items: stretch; }
+  .sde-line .sde-input { flex: 1; }
+  .sde-unit { display: flex; align-items: center; gap: 8px; font-weight: 400; color: var(--sde-text2); }
+  .sde-unit .sde-input { width: 96px; flex: none; }
+  .sde-two { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .sde-kv { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  #sde-root .sde-switch { width: 50px; height: 28px; border-radius: 14px; border: 0; padding: 0; position: relative; flex: none; cursor: pointer; background: var(--sde-border); }
+  #sde-root .sde-switch::after { content: ""; position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: #fff; transition: transform .15s; }
+  #sde-root .sde-switch[aria-checked="true"] { background: var(--sde-accent); }
+  #sde-root .sde-switch[aria-checked="true"]::after { transform: translateX(22px); }
+  .sde-error { background: color-mix(in srgb, var(--sde-bad) 12%, transparent); color: var(--sde-bad); border-radius: 10px; padding: 10px 12px; font-weight: 600; }
+  .sde-log div { display: flex; gap: 10px; padding: 7px 0; border-bottom: 1px solid var(--sde-border); min-width: 0; }
+  .sde-log div:last-child { border-bottom: 0; }
+  .sde-log em { font-style: normal; font-weight: 700; width: 30px; flex: none; color: var(--sde-text2); }
+  .sde-log .on em { color: var(--sde-ok); }
+  .sde-log span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .sde-log small { color: var(--sde-text2); flex: none; }
+  .sde-foot { flex: none; display: flex; align-items: center; justify-content: flex-end; gap: 12px; padding: 12px 20px; border-top: 1px solid var(--sde-border); }
+
+  @media (max-width: 560px) { .sde-two { grid-template-columns: 1fr; } }
+</style>
+
+<div class="sde" id="sde-root">
+  <div class="sde-head">
+    <div><span class="sde-eyebrow">Shelly relays</span><span class="sde-title">Dust &amp; Vacuum</span></div>
+    <button class="sde-btn sec" id="sde-close" type="button">Close</button>
+  </div>
+
+  <div class="sde-tabs" id="sde-tabs" role="tablist" hidden></div>
+
+  <div class="sde-body">
+    <div class="sde-view" data-view="loading"><p>Loading…</p></div>
+
+    <div class="sde-view" data-view="update" hidden>
+      <h2>This plugin isn't running</h2>
+      <p>It needs ncSender 2.0.225 or newer. Update ncSender, check that the plugin is switched on in Settings &rarr; Plugins, then open this again.</p>
+    </div>
+
+    <div class="sde-view" data-view="main" hidden>
+      <div class="sde-card sde-now" id="sde-now">
+        <div class="sde-state">
+          <span class="sde-dot" id="sde-dot"></span>
+          <div><b id="sde-headline">Checking…</b><span class="sde-hint" id="sde-sub"></span></div>
+        </div>
+        <div class="sde-seg" role="group" id="sde-seg">
+          <button id="sde-off" type="button" aria-pressed="false">Off</button>
+          <button id="sde-on" type="button" aria-pressed="false">On</button>
+        </div>
+      </div>
+
+      <div class="sde-error" id="sde-error" hidden></div>
+
+      <div class="sde-card">
+        <label class="sde-field" for="sde-host" id="sde-host-label">Shelly address</label>
+        <div class="sde-line">
+          <input class="sde-input" id="sde-host" placeholder="192.168.1.50" autocomplete="off" autocapitalize="off" spellcheck="false" inputmode="url">
+          <button class="sde-btn sec" id="sde-test" type="button">Test</button>
+        </div>
+        <span class="sde-hint" id="sde-test-out"></span>
+        <label class="sde-field">Relay channel
+          <span class="sde-unit"><input class="sde-input" id="sde-channel" type="number" min="0" max="7" step="1" inputmode="numeric"> 0, unless the Shelly has several outputs</span>
+        </label>
+      </div>
+
+      <div class="sde-card">
+        <div class="sde-kv"><b id="sde-enabled-label">Switch it automatically</b>
+          <button class="sde-switch" id="sde-enabled" type="button" role="switch" aria-checked="true" aria-labelledby="sde-enabled-label"></button></div>
+        <div class="sde-two">
+          <label class="sde-field">Switch on with
+            <select class="sde-input" id="sde-trigger">
+              <option value="spindle">The spindle (M3 / M4, off at M5)</option>
+              <option value="flood">Flood coolant (M8, off at M9)</option>
+              <option value="mist">Mist coolant (M7, off at M9)</option>
+              <option value="job">Every job (start to end)</option>
+            </select>
+          </label>
+          <label class="sde-field">Keep running afterwards
+            <span class="sde-unit"><input class="sde-input" id="sde-delay" type="number" min="0" max="600" step="1" inputmode="numeric"> seconds</span>
+          </label>
+        </div>
+        <span class="sde-hint" id="sde-auto-out"></span>
+        <div class="sde-kv"><span id="sde-notify-label">Tell me when the Shelly can't be switched</span>
+          <button class="sde-switch" id="sde-notify" type="button" role="switch" aria-checked="true" aria-labelledby="sde-notify-label"></button></div>
+      </div>
+
+      <div class="sde-card">
+        <label class="sde-field" for="sde-pin">Switch on the main screen</label>
+        <select class="sde-input" id="sde-pin"></select>
+        <span class="sde-hint" id="sde-pin-out"></span>
+      </div>
+
+      <div class="sde-card"><b>Recent</b><div class="sde-log" id="sde-log"></div></div>
+    </div>
+  </div>
+
+  <div class="sde-foot" id="sde-foot" hidden>
+    <span class="sde-hint" id="sde-saved"></span>
+    <button class="sde-btn" id="sde-save" type="button" disabled>Save</button>
+  </div>
+</div>
+
+<script>
+(function () {
+  var PLUGIN_ID = 'com.community.shellydustextractor';
+  var BASE = window.location.origin.replace(/\/$/, '') || 'http://localhost:__SERVER_PORT__';
+  var URL_REQ = BASE + '/api/plugins/' + PLUGIN_ID + '/request';
+  var root = document.getElementById('sde-root');
+  var $ = function (id) { return document.getElementById(id); };
+  // What each device is called on a main-screen switch, and its own words.
+  var WORDS = {
+    dust: { switchName: 'Dust Extractor', it: 'the extractor' },
+    pump: { switchName: 'Vacuum Pump', it: 'the pump' }
+  };
+  var st = null;          // the plugin's last answer: { order, devices: { dust, pump } }
+  var cur = 'dust';       // the device whose tab is open
+  var forms = null;       // every device's settings as edited here
+  var saved = null;       // ... and as last saved
+  var tested = {};        // Test was pressed for this device in this window
+  var savedAt = 0;
+  var saveError = null;   // why the last Save was refused
+  // The controller's outputs: how many, which have a switch already, which another plugin uses.
+  var ports = { count: 0, switches: {}, taken: {} };
+
+  function ask(body) {
+    return fetch(URL_REQ, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body || {}) })
+      .then(function (r) { if (r.status === 404) throw { update: true }; return r.json(); })
+      .then(function (s) { if (!s || s.unsupported || !s.devices) throw { update: true }; st = s; render(); return s; })
+      .catch(function (e) { if (e && e.update) show('update'); });
+  }
+
+  function show(name) {
+    Array.prototype.forEach.call(root.querySelectorAll('.sde-view'), function (v) { v.hidden = v.getAttribute('data-view') !== name; });
+    $('sde-foot').hidden = $('sde-tabs').hidden = name !== 'main';
+  }
+
+  // Rebuilding a list under a finger loses the tap, so only touch the DOM on a real change.
+  function html(el, value) { if (el.__sde !== value) { el.innerHTML = value; el.__sde = value; } }
+  function text(el, value) { value = value == null ? '' : String(value); if (el.textContent !== value) el.textContent = value; }
+  function flag(el, message) { el.hidden = !message; text(el, message || ''); }
+  function cls(el, value) { if (el.className !== value) el.className = value; }
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function same(a, b) { return JSON.stringify(a) === JSON.stringify(b); }
+  function copy(v) { return JSON.parse(JSON.stringify(v)); }
+  function words(key) { return WORDS[key] || { switchName: st.devices[key].title, it: 'it' }; }
+
+  // Times come from ncSender's clock, which may not be this screen's.
+  function ago(t) {
+    var s = Math.max(0, Math.round((st.now - t) / 1000));
+    if (s < 60) return 'Just now';
+    if (s < 3600) return Math.floor(s / 60) + ' min ago';
+    if (s < 86400) return Math.floor(s / 3600) + ' h ago';
+    return Math.floor(s / 86400) + ' d ago';
+  }
+
+  /* ---------- the settings of the open tab ---------- */
+
+  function settingsOf(answer) {
+    var all = {};
+    answer.order.forEach(function (key) { all[key] = copy(answer.devices[key].settings); });
+    return all;
+  }
+
+  function fill(answer) {
+    saved = settingsOf(answer);
+    forms = copy(saved);
+    fillInputs();
+  }
+
+  function fillInputs() {
+    var f = forms[cur];
+    $('sde-host').value = f.host;
+    $('sde-channel').value = f.channel;
+    $('sde-delay').value = f.offDelaySec;
+    $('sde-trigger').value = f.trigger;
+    renderPins();
+  }
+
+  function read() {
+    var f = forms[cur], was = saved[cur];
+    f.host = $('sde-host').value.trim();
+    f.trigger = $('sde-trigger').value;
+    var delay = parseInt($('sde-delay').value, 10);
+    f.offDelaySec = isFinite(delay) ? Math.min(600, Math.max(0, delay)) : was.offDelaySec;
+    var channel = parseInt($('sde-channel').value, 10);
+    f.channel = isFinite(channel) ? Math.min(7, Math.max(0, channel)) : was.channel;
+    var pin = parseInt($('sde-pin').value, 10);
+    f.panelPin = isFinite(pin) ? pin : -1;
+  }
+
+  /* ---------- the main-screen switch ---------- */
+
+  function getJson(path) { return fetch(BASE + path).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }); }
+
+  // An output another plugin drives (a tool clamp, say) must never be offered:
+  // this plugin switches its outputs on by itself.
+  function scan(name, settings) {
+    Object.keys(settings || {}).forEach(function (key) {
+      var v = settings[key];
+      if (typeof v === 'string') {
+        var re = /M6[2-5]\s*P\s*(\d+)/gi, m;
+        while ((m = re.exec(v)) !== null) ports.taken[parseInt(m[1], 10)] = name;
+      } else if (typeof v === 'number' && v >= 0 && v <= 15 && v === Math.floor(v) && /aux|pin|output/i.test(key) && !/bridge|input/i.test(key)) {
+        ports.taken[v] = name;
+      }
+    });
+  }
+
+  function loadPorts() {
+    return Promise.all([getJson('/api/server-state'), getJson('/api/settings'), getJson('/api/plugins')]).then(function (r) {
+      var next = { count: 0, switches: {}, taken: {} };
+      next.count = (r[0] && r[0].machineState && r[0].machineState.outputPins) || 0;
+      ((r[1] && r[1].auxOutputs) || []).forEach(function (o) {
+        var m = /^\s*M64\s*P\s*(\d+)\s*$/i.exec((o && o.on) || '');
+        if (m) next.switches[parseInt(m[1], 10)] = o.name || 'Output';
+      });
+      ports = next;
+      var others = (Array.isArray(r[2]) ? r[2] : []).filter(function (p) { return p && p.enabled && p.id !== PLUGIN_ID; });
+      return Promise.all(others.map(function (p) {
+        return getJson('/api/plugins/' + encodeURIComponent(p.id) + '/settings').then(function (s) { scan(p.name || p.id, s); });
+      }));
+    }).then(function () { if (forms) renderPins(); });
+  }
+
+  // Who else has this output: another plugin, or this plugin's other device.
+  function takenBy(pin, key) {
+    if (ports.taken[pin]) return ports.taken[pin];
+    for (var i = 0; i < st.order.length; i++) {
+      var other = st.order[i];
+      if (other !== key && forms[other].panelPin === pin) return 'the ' + st.devices[other].title.toLowerCase();
+    }
+    return null;
+  }
+
+  function renderPins() {
+    var f = forms[cur], count = ports.count;
+    st.order.forEach(function (key) { count = Math.max(count, forms[key].panelPin + 1, saved[key].panelPin + 1); });
+    var markup = '<option value="-1">No switch</option>';
+    for (var i = 0; i < count; i++) {
+      var by = takenBy(i, cur);
+      var note = by ? ' · used by ' + by : (ports.switches[i] ? ' · switch “' + ports.switches[i] + '”' : '');
+      markup += '<option value="' + i + '"' + (by && i !== f.panelPin ? ' disabled' : '') + '>Output P' + i + ' (M64 P' + i + ')' + esc(note) + '</option>';
+    }
+    html($('sde-pin'), markup);
+    $('sde-pin').value = String(f.panelPin);
+    var pin = f.panelPin, c = 'sde-hint', msg, w = words(cur), taken = pin >= 0 ? takenBy(pin, cur) : null;
+    if (pin < 0) {
+      msg = ports.count ? 'Pick a spare controller output to get an On / Off switch for ' + w.it + ' on the main screen, next to your other outputs. Nothing has to be wired to it: ncSender only uses it as a marker.'
+        : 'Connect the controller to see its outputs. A spare one gives you an On / Off switch on the main screen.';
+    } else if (taken) {
+      c += ' bad'; msg = 'P' + pin + ' is used by ' + taken + '. Pick another output: this plugin switches its output on by itself.';
+    } else if (ports.switches[pin]) {
+      msg = 'On the main screen as “' + ports.switches[pin] + '”. It switches ' + w.it + ' and shows when it runs. Only keep this if nothing else is wired to P' + pin + '.';
+    } else {
+      msg = 'Now add the switch: Settings → Auxiliary I/O → Add Output, name it ' + w.switchName + ', Output M64 P' + pin + '. Only use an output with nothing wired to it.';
+    }
+    cls($('sde-pin-out'), c);
+    text($('sde-pin-out'), msg);
+  }
+
+  /* ---------- drawing ---------- */
+
+  // One device's state in a few words, for its tab and its headline.
+  function stateOf(key) {
+    var d = st.devices[key], r = d.relay;
+    if (!d.settings.host) return { dot: '', head: 'Not set up yet', on: false, off: false, pending: false };
+    if (r.switching === true) return { dot: ' busy', head: 'Switching on…', on: true, off: false, pending: true };
+    if (r.switching === false) return { dot: ' busy', head: 'Switching off…', on: false, off: true, pending: true };
+    if (r.reachable === false) return { dot: ' bad', head: "Can't reach the Shelly", on: false, off: false, pending: false };
+    if (r.output === true) return { dot: ' on', head: 'Running', on: true, off: false, pending: false };
+    if (r.output === false) return { dot: '', head: 'Off', on: false, off: true, pending: false };
+    return { dot: ' busy', head: 'Checking…', on: false, off: false, pending: false };
+  }
+
+  function renderTabs() {
+    html($('sde-tabs'), st.order.map(function (key) {
+      var s = stateOf(key);
+      return '<button class="sde-tab" type="button" role="tab" data-key="' + key + '" aria-selected="' + (key === cur ? 'true' : 'false') + '">' +
+        '<span class="sde-dot' + s.dot + '"></span><span><b>' + esc(st.devices[key].title) + '</b><small>' + esc(s.head) + '</small></span></button>';
+    }).join(''));
+  }
+
+  function render() {
+    if (!st) return;
+    if (!st.devices[cur]) cur = st.order[0];
+    if (!forms) fill(st);
+    var d = st.devices[cur], f = forms[cur], r = d.relay, hasHost = !!d.settings.host, last = d.recent[0], s = stateOf(cur), w = words(cur);
+    renderTabs();
+
+    var sub = last ? last.why + ' · ' + ago(last.t) : '';
+    if (!hasHost) sub = "Enter this Shelly's address below, then Save.";
+    else if (r.switching === null && (r.reachable === false || r.output === null)) sub = '';
+    else if (r.switching === null && r.output === true) {
+      if (d.offInSec !== null) sub = 'Switches off in ' + d.offInSec + ' s';
+      else if (d.stopping) sub = 'Switches off once the machine has stopped moving';
+    }
+    cls($('sde-dot'), 'sde-dot' + s.dot);
+    text($('sde-headline'), s.head);
+    text($('sde-sub'), sub);
+    $('sde-on').disabled = $('sde-off').disabled = !hasHost;
+    $('sde-on').setAttribute('aria-pressed', s.on ? 'true' : 'false');
+    $('sde-off').setAttribute('aria-pressed', s.off ? 'true' : 'false');
+    cls($('sde-on'), s.pending && s.on ? 'pending' : '');
+    cls($('sde-off'), s.pending && s.off ? 'pending' : '');
+    $('sde-seg').setAttribute('aria-label', d.title);
+    cls($('sde-now'), 'sde-card sde-now' + (s.on && !s.pending ? ' on' : ''));
+    flag($('sde-error'), saveError || (hasHost ? r.error : null));
+
+    text($('sde-host-label'), 'Shelly address for ' + w.it);
+    $('sde-enabled').setAttribute('aria-checked', f.enabled ? 'true' : 'false');
+    $('sde-notify').setAttribute('aria-checked', f.notify ? 'true' : 'false');
+    $('sde-trigger').disabled = $('sde-delay').disabled = !f.enabled;
+    var auto;
+    if (cur === 'pump') {
+      auto = f.enabled ? 'Careful with a vacuum table: whenever this switches the pump off (a spindle stop, an alarm, a stopped job), the work is let go.'
+        : 'Off: only you switch the pump, with its switch or here. That is the safe choice for a vacuum table, where a pump that stops lets go of the work.';
+    } else {
+      auto = f.enabled ? 'It switches off once the machine has stopped moving, plus the seconds above to clear the hose.'
+        : 'Off: only you switch it, with its switch or here.';
+    }
+    cls($('sde-auto-out'), 'sde-hint' + (cur === 'pump' && f.enabled ? ' bad' : ''));
+    text($('sde-auto-out'), auto);
+
+    var t = d.test, c = 'sde-hint', msg = "The Shelly's IP address on your network. Reserve it in your router so it doesn't change.";
+    if (tested[cur] && t.state === 'working') msg = 'Looking for a Shelly at ' + t.host + '…';
+    else if (tested[cur] && t.state === 'error') { c += ' bad'; msg = t.error; }
+    else if (tested[cur] && t.state === 'ok') {
+      var dev = t.device;
+      if (dev.auth) { c += ' bad'; msg = 'Found ' + dev.name + ', but it has a password set. Turn off authentication on the Shelly: this plugin can\'t sign in.'; }
+      else { c += ' good'; msg = 'Found ' + dev.name + (dev.model ? ' (' + dev.model + (dev.gen ? ', Gen ' + dev.gen : '') + ')' : '') + '.'; }
+    }
+    cls($('sde-test-out'), c);
+    text($('sde-test-out'), msg);
+    $('sde-test').disabled = !!tested[cur] && t.state === 'working';
+
+    html($('sde-log'), d.recent.length ? d.recent.map(function (e) {
+      return '<div class="' + (e.on ? 'on' : 'off') + '"><em>' + (e.on ? 'On' : 'Off') + '</em><span>' + esc(e.why) + '</span><small>' + ago(e.t) + '</small></div>';
+    }).join('') : '<div><span class="sde-hint">Nothing switched yet.</span></div>');
+
+    renderSave();
+    show('main');
+  }
+
+  function renderSave() {
+    var dirty = !same(forms, saved);
+    $('sde-save').disabled = !dirty;
+    text($('sde-saved'), dirty ? 'Not saved yet' : (Date.now() - savedAt < 4000 ? 'Saved' : ''));
+  }
+
+  /* ---------- actions ---------- */
+
+  $('sde-close').addEventListener('click', function () { window.postMessage({ type: 'close-plugin-dialog' }, '*'); });
+  $('sde-on').addEventListener('click', function () { ask({ action: 'on', device: cur }); });
+  $('sde-off').addEventListener('click', function () { ask({ action: 'off', device: cur }); });
+  $('sde-test').addEventListener('click', function () { tested[cur] = true; ask({ action: 'test', device: cur, host: $('sde-host').value }); });
+
+  $('sde-tabs').addEventListener('click', function (ev) {
+    var tab = ev.target.closest ? ev.target.closest('.sde-tab') : null;
+    var key = tab ? tab.getAttribute('data-key') : null;
+    if (!key || key === cur || !forms) return;
+    read();                 // keep what was typed on the tab being left
+    cur = key;
+    fillInputs();
+    render();
+  });
+
+  ['sde-host', 'sde-channel', 'sde-delay', 'sde-trigger', 'sde-pin'].forEach(function (id) {
+    var onEdit = function () { if (forms) { read(); saveError = null; if (id === 'sde-pin') renderPins(); renderSave(); } };
+    $(id).addEventListener('input', onEdit);
+    $(id).addEventListener('change', onEdit);
+  });
+  $('sde-enabled').addEventListener('click', function () { if (forms) { forms[cur].enabled = !forms[cur].enabled; saveError = null; render(); } });
+  $('sde-notify').addEventListener('click', function () { if (forms) { forms[cur].notify = !forms[cur].notify; saveError = null; render(); } });
+
+  $('sde-save').addEventListener('click', function () {
+    if (!forms) return;
+    read();
+    for (var i = 0; i < st.order.length; i++) {
+      var key = st.order[i], pin = forms[key].panelPin;
+      if (pin >= 0 && ports.taken[pin]) { saveError = st.devices[key].title + ': P' + pin + ' is used by ' + ports.taken[pin] + '. Pick another output for the switch.'; render(); return; }
+    }
+    $('sde-save').disabled = true;
+    ask({ action: 'save', settings: forms }).then(function (s) {
+      if (!s) return;
+      saveError = s.saveError;
+      if (!saveError) { savedAt = Date.now(); fill(s); }
+      render();
+    });
+  });
+
+  // Keep the window current while it is open; stop once the dialog is gone.
+  var beats = 0;
+  var timer = setInterval(function () {
+    if (!document.body.contains(root)) return clearInterval(timer);
+    ask({});
+    // A switch may be added in Settings while this window is open.
+    if (++beats % 5 === 0 && document.activeElement !== $('sde-pin')) loadPorts();
+  }, 1000);
+  ask({}).then(loadPorts);
+})();
+</script>

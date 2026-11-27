@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="512" height="512"><defs><clipPath id="ghalf"><circle cx="64" cy="64" r="55"/></clipPath></defs>
+    <circle cx="64" cy="64" r="58" fill="#fff"/>
+    <g clip-path="url(#ghalf)"><rect x="64" y="0" width="64" height="128" fill="#2563eb"/></g>
+    <circle cx="64" cy="64" r="58" fill="none" stroke="#2563eb" stroke-width="6"/><g transform="translate(-26 2) translate(64 64) scale(.74) translate(-64 -64)">
+    <rect x="27" y="38" width="22" height="11" rx="3" fill="#94a3b8"/>
+    <rect x="54" y="21" width="20" height="13" rx="3.5" fill="#1e293b"/>
+    <rect x="42" y="33" width="44" height="25" rx="5" fill="#3b82f6"/>
+    <rect x="42" y="42" width="44" height="5" fill="#1d4ed8"/>
+    <path d="M44 58 H84 L70 85 H58 Z" fill="#93c5fd"/>
+    <path d="M64 58 H84 L70 85 H64 Z" fill="#60a5fa"/>
+    <path d="M52 67 L76 61 M57 77 L71 73" stroke="#fff" stroke-width="3.2" stroke-linecap="round"/>
+    <rect x="58" y="85" width="12" height="5" fill="#1e293b"/>
+    <rect x="49" y="90" width="30" height="17" rx="4" fill="#f59e0b"/>
+    <rect x="49" y="95" width="30" height="3.6" fill="#d97706"/>
+  </g><circle cx="91" cy="64" r="19.5" fill="#2563eb" stroke="#fff" stroke-width="4.29"/>
+    <path d="M79.5 70.6 A 13.3 13.3 0 1 1 102.5 70.6" fill="none" stroke="#bfdbfe" stroke-width="3.9000000000000004" stroke-linecap="round"/>
+    <path d="M91 64 L98.5 55.0" stroke="#f59e0b" stroke-width="3.705" stroke-linecap="round"/>
+    <circle cx="91" cy="64" r="3.3150000000000004" fill="#fff"/></svg>
