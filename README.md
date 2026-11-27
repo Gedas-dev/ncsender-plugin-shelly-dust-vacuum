@@ -32,7 +32,7 @@ Use outputs with nothing wired to them: the plugin turns them on by itself.
 - Needs ncSender 2.0.225 or newer.
 - Authentication must be off on the Shelly (it is off out of the box).
 - For a motor, let the Shelly switch a contactor, not the motor itself.
-- New plugin, tested against a simulated ncSender and simulated Shellys. Reports from real machines are welcome in [Issues](https://github.com/Gedas-dev/ncsender-plugin-shelly-dust-vacuum/issues).
+- Tested on the author's machine with real Shelly relays, and by automated tests against a simulated ncSender. Reports from other machines are welcome in [Issues](https://github.com/Gedas-dev/ncsender-plugin-shelly-dust-vacuum/issues).
 
 #### License
 
