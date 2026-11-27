@@ -27,6 +27,12 @@ An [ncSender](https://github.com/siganberg/ncSender) plugin that switches a **du
 
 Use outputs with nothing wired to them: the plugin turns them on by itself.
 
+#### Wiring
+
+![Wiring a Shelly relay: straight to a small load, or through a contactor for a motor. The SW terminal is not used.](docs/wiring.png)
+
+Each Shelly is wired the same way. No wall switch is needed: the SW terminal stays empty.
+
 #### Good to know
 
 - Needs ncSender 2.0.225 or newer.
