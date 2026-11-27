@@ -1,6 +1,6 @@
 <img src="plugin/icon.png" width="96" align="right" alt="Plugin icon: a cyclone dust collector and a vacuum gauge">
 
-# Shelly Dust & Vacuum for ncSender
+### Shelly Dust & Vacuum for ncSender
 
 **Version 0.3.2** · [Download the latest release](https://github.com/Gedas-dev/ncsender-plugin-shelly-dust-vacuum/releases/latest)
 
@@ -14,26 +14,26 @@ An [ncSender](https://github.com/siganberg/ncSender) plugin that switches a **du
 
 ![The plugin window: one tab for the dust extractor, one for the vacuum pump](docs/window.png)
 
-## Install
+#### Install
 
 1. Download the zip from the [latest release](https://github.com/Gedas-dev/ncsender-plugin-shelly-dust-vacuum/releases/latest). In ncSender open **Settings → Plugins → Install Plugin** and choose it. Do not unzip it.
 2. Open **Dust & Vacuum**. On each tab type that Shelly's IP address, press **Test**, then **Save**.
 3. Press **On** and **Off** on each tab to check the wiring.
 
-## Main-screen switches
+#### Main-screen switches
 
 1. In the plugin window, pick a spare controller output for each device (for example P0 and P1) and **Save**.
 2. In ncSender open **Settings → Auxiliary I/O → Add Output**, name it, and choose the same output (*M64 P0*, *M64 P1*).
 
 Use outputs with nothing wired to them: the plugin turns them on by itself.
 
-## Good to know
+#### Good to know
 
 - Needs ncSender 2.0.225 or newer.
 - Authentication must be off on the Shelly (it is off out of the box).
 - For a motor, let the Shelly switch a contactor, not the motor itself.
 - New plugin, tested against a simulated ncSender and simulated Shellys. Reports from real machines are welcome in [Issues](https://github.com/Gedas-dev/ncsender-plugin-shelly-dust-vacuum/issues).
 
-## License
+#### License
 
 [GPL-3.0](LICENSE)
