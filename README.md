@@ -29,7 +29,7 @@ Use outputs with nothing wired to them: the plugin turns them on by itself.
 
 #### Wiring
 
-![Wiring a Shelly relay in EU cable colours: brown live to L and I, O to the machine, blue neutral, green-yellow earth straight to the machine. The SW terminal is not used.](docs/wiring.png)
+![Wiring a Shelly relay in EU cable colours: brown live to L and I, O to the load, blue neutral, green-yellow earth straight to the load. The SW terminal is not used.](docs/wiring.png)
 
 Each Shelly is wired the same way. No wall switch is needed: the SW terminal stays empty.
 
